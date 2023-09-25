@@ -1,0 +1,51 @@
+# MacOS hidden files
+**/.DS_Store
+
+# VS Code settings
+.vscode
+
+# Files built by Rust compiler
+/target
+
+# Mdbook
+**/book
+
+# Python
+**/__pycache__
+
+# Built dist and egg-info files
+/dist
+/*.egg-info
+
+# Jupyter Notebook
+**/.ipynb_checkpoints
+
+# Jupyter Book
+**/_build
+
+# Playground
+/playground
+
+# Large data directory
+/flowcharts
+/intflex-file
+
+# Report directory
+/report
+
+# Auxiliary files when compiling LaTeX 
+**/*.aux
+**/*.bbl
+**/*.bcf
+**/*.blg
+**/*.fdb_latexmk
+**/*.fls
+**/*.log
+**/*.out
+**/*.run.xml
+**/*.synctex.gz
+**/*.toc
+**/*.idx
+**/*.ind
+**/*.ilg
+**/*.log
