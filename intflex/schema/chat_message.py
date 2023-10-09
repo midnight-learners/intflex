@@ -1,6 +1,7 @@
 from typing import Self
 from enum import Enum
 
+
 class ChatRole(Enum):
     
     System = "system"
@@ -22,6 +23,7 @@ class ChatRole(Enum):
                 return ChatRole.Assistant
             case _:
                 raise ValueError("Unknown role name")
+
 
 class ChatMessage:
     
@@ -54,16 +56,19 @@ class ChatMessage:
             "role": str(self.role),
             "content": self.content
         }
-    
+
+
 class SystemMessage(ChatMessage):
     
     def __init__(self, content: str) -> None:
         super().__init__(role=ChatRole.System, content=content)
-    
+
+
 class UserMessage(ChatMessage):
     
     def __init__(self, content: str) -> None:
         super().__init__(role=ChatRole.User, content=content)
+
 
 class AssistantMessage(ChatMessage):
     

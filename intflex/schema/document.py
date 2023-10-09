@@ -5,6 +5,7 @@ from bson import ObjectId
 from uuid import UUID
 from xpyutils import lazy_property
 
+
 class Document:
     
     def __init__(

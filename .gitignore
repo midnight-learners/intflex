@@ -27,11 +27,19 @@
 /playground
 
 # Large data directory
-/flowcharts
 /intflex-file
+/document
+/document_exam
+/document_chart
 
 # Report directory
 /report
+
+# Txt file
+api_test_command.txt
+
+# test file
+**/test.ipynb
 
 # Auxiliary files when compiling LaTeX 
 **/*.aux
@@ -49,3 +57,4 @@
 **/*.ind
 **/*.ilg
 **/*.log
+**/*.docx

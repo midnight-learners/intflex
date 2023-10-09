@@ -5,10 +5,7 @@ from .chat_message import (
     UserMessage,
     AssistantMessage
 )
-from .document import Note
-
 __all__ = [
-    "Note",
     "ChatMessage",
     "ChatRole",
     "SystemMessage",

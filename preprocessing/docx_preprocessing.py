@@ -73,7 +73,7 @@ def convert_docx_to_txt(root_path: str = '../document'):
                 txt_file.write(file_name + "\n")
                 # 遍历文档中的段落并写入.txt文件
                 for text in text_content:
-                    text = text.replace(" ", "").replace("\u00A0", "")
+                    text = text.replace(" ", "").replace("\u00A0", "").replace("\n", "")
                     if text.endswith("附录") or text.startswith("相关表单"):
                         break
                     if text and text != "":
