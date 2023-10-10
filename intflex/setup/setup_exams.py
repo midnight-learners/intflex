@@ -9,7 +9,7 @@ def generate_question():
     Generate similar question based on input question.
     """
     messages = []
-    prompt_path = "./prompt/question_generation.json"
+    prompt_path = "../prompt/question_generation.json"
     with open(prompt_path, encoding="utf-8") as f:
         json_data = json.load(f)
         system_info = json_data["system"]
