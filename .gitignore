@@ -27,7 +27,6 @@
 /playground
 
 # Large data directory
-/intflex-file
 /document
 /document_exam
 /document_chart
@@ -35,11 +34,11 @@
 # Report directory
 /report
 
-# Txt file
+# api test file
 api_test_command.txt
 
 # test file
-**/test.ipynb
+intflex/test.ipynb
 
 # Auxiliary files when compiling LaTeX 
 **/*.aux

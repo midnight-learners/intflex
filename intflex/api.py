@@ -34,6 +34,12 @@ def formatted_response(success: bool, msg: str, data=None) -> dict:
 
 @app.route('/qa', methods=['GET', 'POST'])
 def qa_chat():
+    """
+    QA chat API.
+    :return: Answer
+    """
+
+    """Get request parameters"""
     try:
         request_data = request.get_json()  # 获取 JSON 数据
         # 从 JSON 数据中提取参数
@@ -46,17 +52,19 @@ def qa_chat():
         print(e)
         return formatted_response(success=False, msg="参数解析失败")
 
+    """Retrieve similar vectors from database"""
     try:
         embedded_query = get_text_embedding(user_question)
         points = client.retrieve_similar_vectors(embedded_query, top_k=2)
-        context_text = ""
-        for point in points:
-            print(f"point: {point['page_content']}")
-            context_text += point['page_content']
+        context_text = " ".join([point['page_content'] for point in points])
+        # for point in points:
+        #     print(f"point: {point['page_content']}")
+        #     context_text += point['page_content']
     except Exception as e:
         print(f"Error: failed to retrieve similar vectors from database. {e}")
         return formatted_response(success=False, msg="向量数据库检索失败")
 
+    """Generate response from LLM"""
     try:
         openai_response = get_openai_response(context_text, user_question)
     except Exception as e:
