@@ -1,8 +1,6 @@
 import openai
 import json
 
-# load api key before running
-
 
 def get_text_embedding(text: str, embedding_model_name: str) -> list[float]:
     response = openai.Embedding.create(

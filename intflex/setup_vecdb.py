@@ -11,12 +11,12 @@ from qdrant_client import QdrantClient
 from qdrant_client.http import models
 from qdrant_client.models import PointStruct
 
-from openai_utils import get_text_embedding
+from intflex.utils import get_text_embedding
 
 load_dotenv()
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
-qdrant_config = yaml.safe_load(open("../config.yaml", "r"))['qdrant']
+qdrant_config = yaml.safe_load(open("config.yaml", "r"))['qdrant']
 QDRANT_URL = qdrant_config["url"]
 EMBEDDING_DIM = qdrant_config["embedding_dim"]
 
@@ -26,7 +26,7 @@ def langchain_setup_docs_vecdb():
     Using Langchain framework to split document, embedding text and store in Vector DB
     :return:
     """
-    loader = DirectoryLoader('../../document_txt', glob="**/*.txt", show_progress=True, use_multithreading=True)
+    loader = DirectoryLoader('../document_txt', glob="**/*.txt", show_progress=True, use_multithreading=True)
     raw_documents = loader.load()
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=500,
@@ -51,7 +51,7 @@ def setup_charts_vecdb() -> None:
     Setup document chart with embedding keyword and store in Vector DB
     :return: None
     """
-    directory_path = '../../document_chart'
+    directory_path = '../document_chart'
     file_names = os.listdir(directory_path)  # 列出目录下的所有文件和子目录
     file_names = [file for file in file_names if os.path.isfile(os.path.join(directory_path, file))]
 
