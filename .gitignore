@@ -41,7 +41,8 @@
 api_test_command.txt
 
 # test file
-/test.ipynb
+**/test.ipynb
+**/test.py
 
 # Auxiliary files when compiling LaTeX 
 **/*.aux
