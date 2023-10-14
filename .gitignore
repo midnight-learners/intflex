@@ -4,6 +4,9 @@
 # VS Code settings
 .vscode
 
+# ENV
+**/.env
+
 # Files built by Rust compiler
 /target
 
@@ -38,7 +41,7 @@
 api_test_command.txt
 
 # test file
-intflex/test.ipynb
+/test.ipynb
 
 # Auxiliary files when compiling LaTeX 
 **/*.aux
