@@ -33,6 +33,7 @@
 /document
 /document_exam
 /document_chart
+/document_txt
 
 # Report directory
 /report
@@ -59,5 +60,4 @@ api_test_command.txt
 **/*.idx
 **/*.ind
 **/*.ilg
-**/*.log
 **/*.docx
