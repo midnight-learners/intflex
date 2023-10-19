@@ -4,8 +4,9 @@
 # VS Code settings
 .vscode
 
-# ENV
+# config
 .env
+config.yaml
 
 # Python
 /__pycache__
