@@ -23,7 +23,7 @@ def convert_docx_to_txt(root_path: str = '../document'):
             elif isinstance(child, CT_Tbl):
                 yield Table(child, parent)
 
-    output_root_path = '../document_txt'
+    output_root_path = '../intflex/document_txt'
     sub_paths = [d for d in os.listdir(root_path) if os.path.isdir(os.path.join(root_path, d))]
 
     for sub_path in sub_paths:

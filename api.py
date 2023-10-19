@@ -4,7 +4,7 @@ import openai
 import os
 import yaml
 
-from db import VecDBClient
+from document_raw.db import VecDBClient
 from utils import get_text_embedding, get_openai_response, formatted_response
 
 

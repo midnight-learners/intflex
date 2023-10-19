@@ -4,8 +4,8 @@ openai:
 qdrant:
     storage_path: "./qdrant_storage"
     host: "localhost"
-    port: 6333
-    url: "http://localhost:6333"
+    port: 6334
+    url: "http://localhost:6334/"
     embedding_dim: 1536
     document_chart_collection_name: "inflex_document_chart"
     document_collection_name: "inflex_document"

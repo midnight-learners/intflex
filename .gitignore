@@ -1,49 +1,32 @@
 # MacOS hidden files
-**/.DS_Store
+.DS_Store
 
 # VS Code settings
 .vscode
 
 # ENV
-**/.env
-
-# Files built by Rust compiler
-/target
-
-# Mdbook
-**/book
+.env
 
 # Python
-**/__pycache__
-
-# Built dist and egg-info files
-/dist
-/*.egg-info
-
-# Jupyter Notebook
-**/.ipynb_checkpoints
-
-# Jupyter Book
-**/_build
+/__pycache__
 
 # Playground
 /playground
 
 # Large data directory
-/document
-/document_exam
-/document_chart
-/document_txt
+/doc/document_raw
+/doc/document_exam
+/doc/document_chart
+/doc/document_txt
+/doc/knowledge
+/qdrant_storage
 
-# Report directory
-/report
-
-# api test file
-api_test_command.txt
+# command file
+command.txt
 
 # test file
-**/test.ipynb
-**/test.py
+test.ipynb
+test.py
 
 # Auxiliary files when compiling LaTeX 
 **/*.aux
