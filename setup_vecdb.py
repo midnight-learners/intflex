@@ -24,19 +24,16 @@ EMBEDDING_DIM = qdrant_config["embedding_dim"]
 def langchain_setup_docs_vecdb():
     """
     Using Langchain framework to split document, embedding text and store in Vector DB
-    :return:
     """
-    loader = DirectoryLoader('document_txt', glob="**/*.txt", show_progress=True, use_multithreading=True)
+    loader = DirectoryLoader('./doc/document_txt/', glob="**/*.txt", show_progress=True)
     raw_documents = loader.load()
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=100,
-        separators=["\n", " "]
+        chunk_size=300,
+        chunk_overlap=50,
+        separators=["\n"]
     )
     docs = text_splitter.split_documents(raw_documents)
-    print(docs)
     collection_name = qdrant_config['document_collection_name']
-    print(f"creating collection {collection_name}")
     Qdrant.from_documents(
         documents=docs,
         embedding=OpenAIEmbeddings(),

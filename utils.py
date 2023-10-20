@@ -1,5 +1,8 @@
+from typing import Any
+
 import openai
 import json
+from prompt import qa_prompt
 
 
 def get_text_embedding(text: str, embedding_model_name: str) -> list[float]:
@@ -12,7 +15,7 @@ def get_text_embedding(text: str, embedding_model_name: str) -> list[float]:
     return embedding
 
 
-def get_openai_response(context_text: str, user_question: str, llm_model_name: str) -> str:
+def get_openai_response(context_text: str, user_question: str, llm_model_name: str) -> str | None:
     """
     Generate response based on input question and content text(from vector database).
 
@@ -21,32 +24,31 @@ def get_openai_response(context_text: str, user_question: str, llm_model_name: s
     :param llm_model_name: LLM model name
     :return: LLM response
     """
-    try:
-        messages = []
-        prompt_path = "prompt/question_answering.json"
-        with open(prompt_path, encoding="utf-8") as f:
-            json_data = json.load(f)
-            system = json_data["system"]
-        messages.append({"role": "system", "content": system.format(
-            context=context_text,
-            question=user_question
-        )})
-    except Exception as e:
-        print(f"Error: failed to load prompt file. {e}")
-        return "Error: failed to load prompt file."
+    messages = []
+    for item in qa_prompt:
+        if item["role"] == "system":
+            messages.append(item)
+        elif item["role"] == "user":
+            messages.append({"role": "user", "content": item["content"].format(
+                CONTENT=context_text,
+                question=user_question
+            )})
 
     try:
         response_gpt = openai.ChatCompletion.create(
             model=llm_model_name,
             messages=messages,
-            temperature=0.7,
+            temperature=0.9,
             max_tokens=512,
             top_p=1,
         )
+        total_tokens = response_gpt['usage']['total_tokens']  # 获取消耗的token数量
         result = response_gpt.choices[0].message["content"]
     except Exception as e:
         print(f"Error: failed to generate response. {e}")
-        return "Error: failed to generate response."
+        return
+
+    print(f"\ttoken数量: {total_tokens}")
 
     return result
 
@@ -66,14 +68,3 @@ def formatted_response(success: bool, msg: str, data=None) -> dict:
         }
 
 
-if __name__ == "__main__":
-    messages = []
-    prompt_path = "prompt/question_answering.json"
-    with open(prompt_path, encoding="utf-8") as f:
-        json_data = json.load(f)
-        system = json_data["system"]
-    messages.append({"role": "system", "content": system.format(
-        context="context_text",
-        question="user_question"
-    )})
-    print(messages)

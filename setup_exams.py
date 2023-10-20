@@ -1,3 +1,4 @@
+import configparser
 from typing import Tuple, List, Dict, Any
 import openai
 import json
@@ -5,6 +6,9 @@ import os
 from dotenv import load_dotenv
 from tqdm import tqdm
 import time
+import yaml
+
+from db import PostgresqlClient
 
 
 def parse_raw_questions_to_json(raw_questions: str) -> list[dict]:
@@ -122,10 +126,62 @@ def generate_question(knowledge: str, num_question: int):
     return parse_raw_questions_to_json(raw_questions)
 
 
+def import_database():
+    """
+    Import generated knowledge and questions into database
+    """
+    try:
+        pg_config = yaml.safe_load(open("config.yaml", "r"))['postgresql']
+        pg_client = PostgresqlClient(
+            host=pg_config['host'],
+            port=pg_config['port'],
+            database=pg_config['database'],
+            user=pg_config['user'],
+            password=pg_config['password']
+        )
+    except Exception as e:
+        print(f"Postgresql Client 初始化失败. Exception: {e}")
+        return
+
+    """读取SQL文件"""
+    SQL_CONFIG = configparser.ConfigParser()
+    SQL_CONFIG.read('sql.ini')
+
+    """写入knowledge"""
+    sql_template = SQL_CONFIG.get('insert', 'insert_knowledge', raw=True)
+    knowledge_tuple_list = []
+    with open('ZC-S-H-002知识点.txt', 'r', encoding='utf-8') as f:
+        doc_code, knowledge_id = "ZC-S-H-002", 1
+        for line in f:
+            if line.strip():  # 如果不是空行
+                knowledge_tuple_list.append((doc_code, knowledge_id, line.strip()))
+                knowledge_id += 1
+
+    # pg_client.execute_insert_many(sql_template, knowledge_data)
+
+    """写入question"""
+    sql_template = SQL_CONFIG.get('insert', 'insert_question', raw=True)
+    with open('ZC-S-H-002题目.json', 'r', encoding='utf-8') as f:
+        question_data = json.load(f)
+
+    question_tuple_list = []
+    for question_id, item in enumerate(question_data):
+        question_tuple_list.append((doc_code, question_id + 1, item['question'], 0, json.dumps(item['options']), [item['answer']]))
+
+    # pg_client.execute_insert_many(sql_template, question_tuple_list)
+    pg_client.close()
+
+
 if __name__ == "__main__":
-    load_dotenv()
-    openai.api_key = os.environ.get("OPENAI_API_KEY")
-    openai.proxy = "http://127.0.0.1:7890"
+    import_database()
+
+
+
+
+    """Openai Config"""
+    # load_dotenv()
+    # openai.api_key = os.environ.get("OPENAI_API_KEY")
+    # openai.proxy = "http://127.0.0.1:7890"
 
     """
     Generate knowledge points
@@ -146,15 +202,15 @@ if __name__ == "__main__":
     """
     Generate questions
     """
-    with open('ZC-S-H-002知识点.txt', 'r', encoding='utf-8') as txt_f:
-        knowledge_text = txt_f.read()
-
-    knowledge_list = knowledge_text.split("\n")
-    json_question_list = []
-    for text in tqdm(knowledge_list, desc="Processing Knowledge Points"):
-        question_json = generate_question(knowledge=text, num_question=1)
-        print(question_json)
-        json_question_list += question_json
-
-    with open('ZC-S-H-002题目.json', 'w', encoding='utf-8') as json_f:
-        json.dump(json_question_list, json_f, ensure_ascii=False, indent=4)
+    # with open('ZC-S-H-002知识点.txt', 'r', encoding='utf-8') as txt_f:
+    #     knowledge_text = txt_f.read()
+    #
+    # knowledge_list = knowledge_text.split("\n")
+    # json_question_list = []
+    # for text in tqdm(knowledge_list, desc="Processing Knowledge Points"):
+    #     question_json = generate_question(knowledge=text, num_question=1)
+    #     print(question_json)
+    #     json_question_list += question_json
+    #
+    # with open('ZC-S-H-002题目.json', 'w', encoding='utf-8') as json_f:
+    #     json.dump(json_question_list, json_f, ensure_ascii=False, indent=4)
