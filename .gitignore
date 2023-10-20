@@ -14,7 +14,12 @@ config.yaml
 # Playground
 /playground
 
+# server file
+image.tar
+dump.sql
+
 # Large data directory
+/doc
 /doc/document_raw
 /doc/document_exam
 /doc/document_chart
