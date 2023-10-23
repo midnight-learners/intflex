@@ -53,6 +53,54 @@ def get_openai_response(context_text: str, user_question: str, llm_model_name: s
     return result
 
 
+def get_openai_stream_response(
+        context_text: str,
+        user_question: str,
+        llm_model_name: str,
+        chunk_size: int = 50
+) -> str | None:
+    """
+    Generate response based on input question and content text(from vector database).
+
+    :param context_text: context text from vector database
+    :param user_question: input question
+    :param llm_model_name: LLM model name
+    :return: LLM response
+    """
+    messages = []
+    for item in qa_prompt:
+        if item["role"] == "system":
+            messages.append(item)
+        elif item["role"] == "user":
+            messages.append({"role": "user", "content": item["content"].format(
+                CONTENT=context_text,
+                question=user_question
+            )})
+
+    response_gpt = openai.ChatCompletion.create(
+        model=llm_model_name,
+        messages=messages,
+        temperature=0.9,
+        max_tokens=512,
+        top_p=1,
+        stream=True
+    )
+
+    buffer = ""
+    for streaming in response_gpt:
+        chunk = streaming['choices'][0].get('delta', {}).get('content', '')
+        buffer += chunk
+        print(f"Buffer:{buffer}")
+        if len(buffer) >= chunk_size:
+            buffer = buffer.replace('\n', r'\n')
+            yield 'data: %s\n\n' % buffer
+            buffer = ""
+
+    if buffer:
+        buffer = buffer.replace('\n', r'\n')
+        yield 'data: %s\n\n' % buffer
+
+
 def formatted_response(success: bool, msg: str, data=None) -> dict:
     if success:
         return {
@@ -66,5 +114,3 @@ def formatted_response(success: bool, msg: str, data=None) -> dict:
             "msg": msg,
             "data": None
         }
-
-
