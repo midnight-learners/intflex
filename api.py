@@ -11,36 +11,33 @@ import redis
 from db import VecDBClient, ChatBotRedisClient
 from utils import get_text_embedding, get_openai_response, formatted_response
 
-# ------------------ Load API KEY ------------------------------------
+# ------------------------------------ Load config ------------------------------------
+config = yaml.safe_load(open("config.yaml", "r"))
+
+# ------------------------------------ OpenAI config ------------------------------------
 load_dotenv()
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
-# ------------------ Load config ------------------------------------
-config = yaml.safe_load(open("config.yaml", "r"))
-
-# ------------------ Vector DB Client ------------------------------------
-qdrant_config = config['qdrant']
-QDRANT_URL = qdrant_config["url"]
-EMBEDDING_DIM = qdrant_config["embedding_dim"]
-COLLECTION_NAME = qdrant_config["document_collection_name"]
-
-
-def get_qdrant_client():
-    if "qdrant_client" not in g:
-        g.qdrant_client = VecDBClient(
-            url=QDRANT_URL,
-            collection_name=COLLECTION_NAME,
-            embedding_dim=EMBEDDING_DIM
-        )
-    return g.qdrant_client
-
-# ------------------ OpenAI config ------------------------------------
 openai_config = config['openai']
 CHAT_MODEL_NAME = openai_config['chat_model']
 EMBEDDING_MODEL_NAME = openai_config['embedding_model']
 # openai.proxy = "http://127.0.0.1:7890"
 
-# ------------------ Redis ------------------------------------
+# ------------------------------------ Vector DB Client ------------------------------------
+qdrant_config = config['qdrant']
+
+
+def get_qdrant_client():
+    if "qdrant_client" not in g:
+        g.qdrant_client = VecDBClient(
+            url=qdrant_config["url"],
+            collection_name=qdrant_config["document_collection_name"],
+            embedding_dim=qdrant_config["embedding_dim"]
+        )
+    return g.qdrant_client
+
+
+# ------------------------------------ Redis ------------------------------------
 redis_config = config['redis']
 CHAT_MEMORY_LEN = 6
 
@@ -56,8 +53,9 @@ def get_redis_client():
     return g.redis_client
 
 
-# ------------------ Flask ------------------------------------
+# ------------------------------------ Flask ------------------------------------
 app = Flask(__name__)
+RESPONSE_CHUNK_SIZE = 100
 
 
 @app.route('/dummy/qa', methods=['GET', 'POST'])
@@ -185,7 +183,7 @@ def qa_chat_stream():
             chunk = chunk['choices'][0].get('delta', {}).get('content', '')
             buffer += chunk
             buffer_all += chunk
-            print(f"{index} Buffer:{buffer}")
+            # print(f"{index} Buffer:{buffer}")
             index += 1
             if len(buffer) >= chunk_size:
                 buffer = buffer.replace('\n', r'\n')
@@ -248,7 +246,7 @@ def qa_chat_stream():
                 is_stream=True,
                 chat_history=chat_history,
             ),
-            chunk_size=70,
+            chunk_size=RESPONSE_CHUNK_SIZE,
             user_id=user_id
         )
         return Response(response=stream_response, mimetype='text/event-stream')
