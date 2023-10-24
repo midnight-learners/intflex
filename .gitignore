@@ -34,7 +34,7 @@ dump.sql
 command.txt
 
 # test file
-playground/test.ipynb
+test.ipynb
 test.py
 
 # Auxiliary files when compiling LaTeX 

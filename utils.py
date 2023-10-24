@@ -1,7 +1,6 @@
-from typing import Any
+from typing import Generator
 
 import openai
-import json
 from prompt import qa_prompt
 
 
@@ -15,67 +14,35 @@ def get_text_embedding(text: str, embedding_model_name: str) -> list[float]:
     return embedding
 
 
-def get_openai_response(context_text: str, user_question: str, llm_model_name: str) -> str | None:
-    """
-    Generate response based on input question and content text(from vector database).
-
-    :param context_text: context text from vector database
-    :param user_question: input question
-    :param llm_model_name: LLM model name
-    :return: LLM response
-    """
-    messages = []
-    for item in qa_prompt:
-        if item["role"] == "system":
-            messages.append(item)
-        elif item["role"] == "user":
-            messages.append({"role": "user", "content": item["content"].format(
-                CONTENT=context_text,
-                question=user_question
-            )})
-
-    try:
-        response_gpt = openai.ChatCompletion.create(
-            model=llm_model_name,
-            messages=messages,
-            temperature=0.9,
-            max_tokens=512,
-            top_p=1,
-        )
-        total_tokens = response_gpt['usage']['total_tokens']  # 获取消耗的token数量
-        result = response_gpt.choices[0].message["content"]
-    except Exception as e:
-        print(f"Error: failed to generate response. {e}")
-        return
-
-    print(f"\ttoken数量: {total_tokens}")
-
-    return result
-
-
-def get_openai_stream_response(
+def get_openai_response(
         context_text: str,
         user_question: str,
         llm_model_name: str,
-        chunk_size: int = 50
-) -> str | None:
+        is_stream: bool = False,
+        chat_history: list = None
+) -> str | Generator:
     """
     Generate response based on input question and content text(from vector database).
 
     :param context_text: context text from vector database
     :param user_question: input question
     :param llm_model_name: LLM model name
+    :param is_stream: whether to use stream response
+    :param chat_history: chat history
+
     :return: LLM response
     """
-    messages = []
-    for item in qa_prompt:
-        if item["role"] == "system":
-            messages.append(item)
-        elif item["role"] == "user":
-            messages.append({"role": "user", "content": item["content"].format(
-                CONTENT=context_text,
-                question=user_question
-            )})
+    if chat_history is None:
+        messages = [
+            {"role": "system", "content": qa_prompt["system"]},
+            {"role": "user", "content": qa_prompt["user"].format(CONTENT=context_text, QUESTION=user_question)}
+        ]
+    else:
+        messages = [
+            {"role": "system", "content": qa_prompt["system"]},
+            *chat_history,
+            {"role": "user", "content": qa_prompt["user"].format(CONTENT=context_text, QUESTION=user_question)}
+        ]
 
     response_gpt = openai.ChatCompletion.create(
         model=llm_model_name,
@@ -83,22 +50,15 @@ def get_openai_stream_response(
         temperature=0.9,
         max_tokens=512,
         top_p=1,
-        stream=True
+        stream=is_stream,
     )
 
-    buffer = ""
-    for streaming in response_gpt:
-        chunk = streaming['choices'][0].get('delta', {}).get('content', '')
-        buffer += chunk
-        print(f"Buffer:{buffer}")
-        if len(buffer) >= chunk_size:
-            buffer = buffer.replace('\n', r'\n')
-            yield 'data: %s\n\n' % buffer
-            buffer = ""
-
-    if buffer:
-        buffer = buffer.replace('\n', r'\n')
-        yield 'data: %s\n\n' % buffer
+    if not is_stream:
+        total_tokens = response_gpt['usage']['total_tokens']  # 获取消耗的token数量
+        print(f"\ttoken数量: {total_tokens}")
+        return response_gpt.choices[0].message["content"]
+    else:
+        return response_gpt
 
 
 def formatted_response(success: bool, msg: str, data=None) -> dict:
